@@ -117,3 +117,47 @@
 - 启动后台任务后，在回复末尾列出所有运行中的任务及其预计完成状态
 - 后台任务全部完成后，主动汇总各任务的完成情况（成功/失败/部分完成）
 - 不等待用户追问才汇报——任务完成即汇报
+
+---
+
+## 多主机配置同步
+
+opencode 的 AGENTS.md 和 skills 通过私有 GitHub 仓库 `TRY-0508/basic-setting` 进行多主机同步。
+
+### 仓库结构
+
+```
+basic-setting/
+├── AGENTS.md          # → ~/.config/opencode/AGENTS.md
+└── skills/            # → ~/.config/opencode/skills/
+```
+
+### 同步操作
+
+**上传（当前主机配置有变更时）：**
+
+```powershell
+# Windows
+$src = "$env:USERPROFILE\.config\opencode"
+$repo = "<local-repo-path>"  # 本地 clone 路径
+Copy-Item "$src\AGENTS.md" "$repo\AGENTS.md"
+Copy-Item -Recurse -Force "$src\skills" "$repo\skills"
+cd $repo; git add -A; git commit -m "sync: update config"; git push
+```
+
+**下载（新主机初始化时）：**
+
+```powershell
+# Windows
+git clone https://github.com/TRY-0508/basic-setting.git "<temp-path>"
+$dst = "$env:USERPROFILE\.config\opencode"
+Copy-Item "<temp-path>\AGENTS.md" "$dst\AGENTS.md"
+Copy-Item -Recurse -Force "<temp-path>\skills" "$dst\skills"
+```
+
+### 注意事项
+
+- 仓库为**私有仓库**，推送/拉取需要 GitHub 认证
+- 需配置 git 代理才能在国内网络环境下访问：`git config --global http.proxy http://127.0.0.1:<port>`
+- 修改 AGENTS.md 或用户自建 skill 后，应同步推送到远程仓库
+- Agent 在修改 AGENTS.md 或 skills 后，应提醒用户同步推送

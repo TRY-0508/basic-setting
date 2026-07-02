@@ -1,6 +1,6 @@
 ---
 name: project-workflow
-description: 项目推进流程与文档规范。涵盖 Idea → Design → Workplan → 实现 的完整流程、文档层级一致性、文档编写风格、以及项目目录结构偏好。当用户发起新项目、讨论技术方案、编写项目文档或组织项目结构时触发。
+description: 项目推进流程与文档规范。涵盖层级化文档结构（项目级+模块级）、Idea → Design → Workplan 流程、INDEX.md 导航、模块契约管理、文档编写规范与目录结构。主动使用此 skill 当用户提到"设计""架构""模块""文档结构""INDEX""怎么组织"等，即使没有明确说"创建项目文档"。触发语："设计方案""项目结构""模块拆分""INDEX""文档导航""契约""模块设计"。
 license: MIT
 ---
 
@@ -8,10 +8,78 @@ license: MIT
 
 本节定义项目的标准推进过程。Agent 在协助项目开发时必须遵循此流程。
 
-## 1. 整体流程
+## 1. 层级化文档结构
+
+大型项目的文档不应是单一文件，而应按**项目级 → 模块级**两层组织：
 
 ```
-原始 Idea → 讨论深化 → Idea 文档 → Design 文档 → Workplan → 实现 → Architecture 文档 + Usage 文档
+project/
+├── docs/
+│   ├── INDEX.md                  # 项目文档总索引（必维护）
+│   ├── idea.md                   # 项目概念：方向、目标、边界
+│   ├── design.md                 # 系统级架构：模块清单、跨模块契约、技术选型
+│   ├── workplan.md               # 阶段级实现计划（非任务级）
+│   ├── architecture.md           # 实现后的项目结构说明
+│   ├── usage.md                  # 使用指南
+│   └── modules/                  # 模块级文档
+│       ├── INDEX.md              # 模块状态总览
+│       └── <module-name>/
+│           ├── design.md         # 模块设计：内部架构、对外接口、依赖声明
+│           └── workplan.md       # 模块实现计划
+├── resource/                     # 外部参考资源（见 external-research skill）
+│   ├── papers/
+│   └── projects/
+├── src/                          # 源代码
+└── README.md
+```
+
+### 文档职责划分
+
+| 层级 | 文档 | 包含内容 | 不含内容 |
+|------|------|---------|---------|
+| 项目级 | `design.md` | 模块清单与职责、模块间数据流、跨模块契约、全局技术决策 | 单个模块的内部实现细节 |
+| 项目级 | `workplan.md` | 阶段划分、模块交付顺序、里程碑 | 单个模块的任务拆解 |
+| 模块级 | `modules/<name>/design.md` | 模块内部架构、对外接口定义、依赖声明、数据模型 | 其他模块的内部细节 |
+| 模块级 | `modules/<name>/workplan.md` | 该模块的任务拆解、实现步骤 | 跨模块协调 |
+
+### INDEX.md 规范
+
+`docs/INDEX.md` 是项目文档的入口，必须维护。格式：
+
+```markdown
+# 项目文档索引
+
+## 核心文档
+| 文档 | 说明 |
+|------|------|
+| [idea.md](idea.md) | 项目概念与目标 |
+| [design.md](design.md) | 系统架构与模块契约 |
+| [workplan.md](workplan.md) | 阶段计划 |
+
+## 模块状态
+| 模块 | 设计 | 计划 | 状态 | 依赖 |
+|------|------|------|------|------|
+| core | [design](modules/core/design.md) | [workplan](modules/core/workplan.md) | 设计中 | - |
+| auth | [design](modules/auth/design.md) | [workplan](modules/auth/workplan.md) | 未开始 | core |
+
+## 跨模块契约
+| 契约 | 涉及模块 | 位置 |
+|------|---------|------|
+| core-api 接口定义 | core → auth | [design.md#core-api](design.md) |
+```
+
+### 何时拆分模块文档
+
+满足以下任一条即应创建独立模块文档：
+- 模块有明确的对外接口（API、事件、数据格式）
+- 模块被至少一个其他模块依赖
+- 模块的内部设计需要超过 3 个子章节
+- 模块有独立的实现计划（3 个以上任务）
+
+## 2. 整体流程
+
+```
+原始 Idea → 讨论深化 → Idea 文档 → Design 文档 → Workplan → 实现 → Architecture + Usage
                 ↑                                                              |
                 └──────────────── 反馈调整 ─────────────────────────────────────┘
 ```
@@ -20,34 +88,83 @@ license: MIT
 
 | 阶段 | 输入 | 输出 | 说明 |
 |---|---|---|---|
-| 1. 概念讨论 | 原始 idea（简单想法/思路） | 可行性判断 | 讨论并深化 idea，确认方向可行后再进入文档阶段 |
-| 2. Idea 文档 | 经过讨论的 idea | `docs/idea.md` | 概念级内容：项目方向、可行性分析、核心优势、目标等 |
-| 3. Design 文档 | Idea 文档 | `docs/design.md` | 具体的系统设计，基于 idea 文档展开 |
-| 4. Workplan | Design 文档 | `docs/workplan.md` | 实现计划，将 design 拆解为可执行的任务 |
-| 5. 实现 | Workplan | 代码 | 按 workplan 推进编码实现 |
-| 6. 项目文档 | 完成的代码 | `docs/architecture.md`、`docs/usage.md` 等 | 项目结构说明、使用指南及其他辅助文档 |
+| 1. 概念讨论 | 原始 idea | 可行性判断 | 讨论并深化 idea，确认方向可行后再进入文档阶段 |
+| 2. Idea 文档 | 经过讨论的 idea | `docs/idea.md` | 概念级内容：方向、可行性、核心优势、目标 |
+| 3. Design 文档 | Idea 文档 | `docs/design.md` + 模块级 `design.md` | 先写系统级架构和模块清单，再逐个展开模块设计 |
+| 4. Workplan | Design 文档 | `docs/workplan.md` + 模块级 `workplan.md` | 先定阶段和交付顺序，再拆解各模块任务 |
+| 5. 实现 | Workplan | 代码 | 按模块 workplan 推进，跨模块变更走 `consistency-management` |
+| 6. 项目文档 | 完成的代码 | `docs/architecture.md`、`docs/usage.md` | 项目结构说明、使用指南 |
 
-## 2. 文档层级与一致性
+### 模块级推进
+
+当系统级 design 确定了模块清单后，每个模块走独立的设计→计划→实现子流程：
+
+```
+系统 design.md 定义模块清单
+    │
+    ├── 模块 A: modules/a/design.md → modules/a/workplan.md → 实现
+    ├── 模块 B: modules/b/design.md → modules/b/workplan.md → 实现
+    └── 模块 C: ...
+```
+
+模块之间的依赖关系和接口由系统级 `design.md` 中的**模块契约**约束（见第 4 节）。
+
+## 3. 文档层级与一致性
 
 文档内容的优先级从高到低为：
 
-**Idea 文档 > Design 文档 > Workplan**
+**Idea 文档 > 系统 Design > 模块 Design > 系统 Workplan > 模块 Workplan**
 
 - **Idea 文档** 是最高层级的概念定义，规定项目的方向、目标和边界。
-- **Design 文档** 是 idea 的系统设计展开，必须与 idea 文档保持一致。
-- **Workplan** 是实现计划，必须服务于 design 文档。
+- **系统 Design** 是 idea 的架构展开，定义模块清单和模块契约。
+- **模块 Design** 是系统 design 的下属展开，必须与系统 design 中的契约一致。
+- **Workplan** 是实现计划，必须服务于对应的 design。
 
-在实现过程中，如需调整 idea 或 design：
+在实现过程中，如需调整：
 
-1. 先修改对应的文档（idea 或 design）。
-2. 按照优先级向下同步更新所有受影响的文档（design → workplan）。
-3. 确保各文件内容统一，不存在矛盾。
+1. 判断影响范围：仅影响单个模块，还是跨越模块边界。
+2. 仅影响单模块：更新该模块的 design + workplan。
+3. 跨越模块边界：走 `consistency-management` skill 的变更提案流程。
+4. 按照优先级向下同步更新所有受影响文档。
 
 **关键原则**：任何实现层面的决策不应 bypass 文档层的约束。如果实现过程中发现文档需要调整，必须先更新文档再继续编码。
 
-## 3. 文档编写规范
+## 4. 模块契约
 
-- **语言**：项目文档使用中文编写，系统设计类名词（如 Design、Workplan、Architecture、Module、Component 等）可保留英文。
+模块契约定义在系统级 `design.md` 中，是跨模块协调的核心机制。每个契约包含：
+
+```markdown
+### 契约：<模块A> ↔ <模块B>
+
+**数据格式**：[结构定义或引用链接]
+**调用方式**：[同步/异步、API 签名]
+**错误处理**：[错误传递方式、降级策略]
+**约束条件**：[性能要求、幂等性、顺序保证]
+```
+
+模块级 `design.md` 开头应声明：
+
+```markdown
+## 依赖
+
+| 依赖模块 | 使用契约 | 用途 |
+|---------|---------|------|
+| core | [core-api](design.md#core-api) | 数据持久化 |
+```
+
+模块级 `design.md` 结尾应声明：
+
+```markdown
+## 对外接口
+
+| 接口 | 消费方 | 契约位置 |
+|------|--------|---------|
+| validate() | auth | [design.md#auth-api](design.md) |
+```
+
+## 5. 文档编写规范
+
+- **语言**：项目文档使用中文编写，系统设计类名词（如 Design、Workplan、Module、Contract 等）可保留英文。
 - **格式**：文档统一使用 Markdown 格式。
 - **风格**：遵循以下规则——
 
@@ -57,40 +174,28 @@ license: MIT
 |------|------|
 | "通过多层级事件驱动治理闭环实现架构级可观测性横切插桩" | "每个关键步骤都会触发检查和记录。Governance 域在事件流的关键节点介入，Observability 域记录全过程的追踪数据。" |
 
-**使用平实语言**：优先使用日常词汇而非学术化表达，写得像在向一位没读过代码但有能力的工程师解释。"我们用事件连接组件" > "系统采用事件驱动的耦合机制实现组件间通信"。
+**使用平实语言**：优先使用日常词汇而非学术化表达。"我们用事件连接组件" > "系统采用事件驱动的耦合机制实现组件间通信"。
 
-**不用虚饰限定词**：避免使用膨胀重要性而不增加信息量的词组。
+**不用虚饰限定词**：
 
 | 禁止 | 改用 |
 |---|---|
-| 全项目唯一权威定义 | 以本文为准 / 域定义见此 |
+| 全项目唯一权威定义 | 以本文为准 |
 | 权威参考实现 | 参考实现 |
 | 企业级生产就绪 | 生产可用（附具体验证条件） |
 | 端到端全覆盖 | 覆盖以下场景：[列出] |
 | 最佳实践 | 推荐做法（附理由） |
 
-**具体胜过抽象**："每个域有清晰的边界" → 说出边界在哪里："Planning 域产生 Plan，它从不执行任何 Node。"；"系统是可扩展的" → 说出如何扩展："新 Lane 类型可通过实现 Lane 接口并向 ExecutionRouter 注册来添加。"
+**具体胜过抽象**："每个域有清晰的边界" → 说出边界在哪里；"系统是可扩展的" → 说出如何扩展。
 
-**设计文档不含历史痕迹**：idea.md 和 design.md 这类设计文档始终反映项目的最新方案，不保留过时信息。每次讨论后若有结论性调整，直接重写文档对应的部分，去掉旧的方案描述、版本标记（如 V1/V2）、调整备注（如"之前""调整后""改为"）、进度勾选（如 ✅ 已完成）、API 验证记录等实现过程中的临时内容。读者看到的是当前权威方案，而不是方案演进的聊天记录。
+**设计文档不含历史痕迹**：design.md 反映项目的最新方案，不保留过时信息。每次讨论后有结论性调整，直接重写对应部分，去掉旧方案描述、版本标记、调整备注、进度勾选等临时内容。
 
-## 4. 项目目录结构偏好
+## 6. 大项目的文档初始化顺序
 
-典型项目的顶层目录结构如下：
-
-```
-project/
-├── docs/               # 所有项目文档
-│   ├── idea.md         # 项目概念文档
-│   ├── design.md       # 系统设计文档
-│   ├── workplan.md     # 实现计划
-│   ├── architecture.md # 项目结构说明（实现后）
-│   └── usage.md        # 使用指南（实现后）
-├── resource/           # 外部参考资源（结构见 external-research skill）
-│   ├── papers/         # 学术论文
-│   └── projects/       # 参考项目
-├── src/                # 源代码
-└── README.md
-```
-
-- `docs/` 和 `resource/` 为通用文件夹，Agent 在初始化新项目时应主动创建。
-- 实现过程中如需其他辅助文档，可在 `docs/` 下按需添加，保持命名清晰、内容聚焦。
+1. 创建 `docs/INDEX.md`（先有壳，逐步填充）
+2. 写 `docs/idea.md`
+3. 写 `docs/design.md`：先列出模块清单和模块契约，不展开细节
+4. 创建 `docs/modules/INDEX.md`
+5. 逐个创建 `modules/<name>/design.md`
+6. 写 `docs/workplan.md`（阶段级）
+7. 逐个创建 `modules/<name>/workplan.md`

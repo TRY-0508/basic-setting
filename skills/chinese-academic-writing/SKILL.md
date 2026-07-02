@@ -1,6 +1,6 @@
 ---
 name: chinese-academic-writing
-description: 中文学术论文的排版规范与写作约束。涵盖 xelatex+xeCJK 的中文 PDF 排版、python-docx 的中文 Word 排版、以及中文学术写作的内容规范（术语处理、标点统一、引用格式、概念解释方法等）。当用户要求生成中文学术论文、课程论文、毕设论文，或涉及 LaTeX/Word 中文排版问题时触发。
+description: 中文学术论文的排版规范与写作约束。涵盖 xelatex+xeCJK 的中文 PDF 排版、python-docx 的中文 Word 排版、以及中文学术写作的内容规范（术语处理、标点统一、引用格式、概念解释方法等）。触发语："写论文""课程论文""毕设论文""学术论文""LaTeX""xelatex""Word 排版""中文 PDF""APA 引用""中文学术写作""学位论文"。
 ---
 
 # 中文学术论文写作

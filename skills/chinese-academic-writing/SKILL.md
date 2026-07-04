@@ -5,6 +5,8 @@ description: 中文学术论文的排版规范与写作约束。涵盖 xelatex+x
 
 # 中文学术论文写作
 
+本 skill 用于正式的学术写作场景（期刊论文、学位论文、课程论文等），不适用于日常项目文档。日常文档的内容风格偏好见 AGENTS.md 中的「个人文档内容偏好」章节。
+
 ## LaTeX 中文排版（xelatex + xeCJK）
 
 1. **不要使用 `\zihao{}` 和 `\CJKfamily{zhhei}`**——这些是 `ctex` 包的命令。若未加载 ctex，使用 `\fontsize{Xpt}{Ypt}\selectfont` 替代 `\zihao`；使用 `\setCJKfamilyfont{hei}{SimHei}` + `\newcommand{\heiti}{\CJKfamily{hei}}` 替代 `\CJKfamily{zhhei}`。**这是最常见的中文 PDF 乱码原因。**

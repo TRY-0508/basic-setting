@@ -1,42 +1,71 @@
 ---
 name: external-research
-description: 外部资源调研与文档规范。涵盖学术论文和开源项目的调研方法、资源目录组织、分析文档的编写标准（论文五维度、项目四维度）、以及新增资源的流程。触发语："调研""分析一下这个论文""看看这个开源项目""参考项目""resource/ 目录""外部资源""相关研究""竞品分析"。
+description: 大型多域项目中，调研资源的目录组织与元文档编写规范。当项目包含 resource/ 目录、需要按域分类管理论文/项目、或需要编写 INDEX.md / OVERVIEW.md 时使用。触发语："resource/ 目录""这个资源放哪个域""更新 INDEX""更新 OVERVIEW""论文五维度""项目四维度""跨域引用"。
 license: MIT
 ---
 
 # 外部资源调研与文档规范
 
-在项目推进过程中，需要调研外部资源（学术 paper、开源项目等）作为设计参照。本规范定义资源的组织方式和分析文档的编写标准。
+大型多域项目推进中，将外部资源（学术 paper、开源项目等）按项目域组织管理，并编写结构化分析文档。
 
 > 本 skill 生成的调研分析文档均遵循 AGENTS.md 中的「个人文档内容偏好」：平实语言、具体而非抽象、不堆砌术语、不用虚饰限定词。
 
+## 0. 触发条件
+
+加载本 skill 的场景：
+
+- 项目中已有或计划建立 `resource/` 目录结构
+- 调研资源数量大（30+），且跨越规划/编排/记忆/工具/推理等多个域
+- 需要对资源进行长期维护和跨模块交叉引用
+- 用户明确要求按"域"组织资源、或编写 INDEX.md / OVERVIEW.md
+
 ## 1. 目录结构
 
-资源统一存于 `resource/` 下，按类型和主题分层组织：
+资源统一存于 `resource/` 下，按**项目域**（而非研究主题）分层组织：
 
 ```
 resource/
-├── papers/                    # 学术论文
-│   ├── INDEX.md               # 总索引（分类导航 + 数量统计）
-│   ├── category-a/OVERVIEW.md # 分类总览
-│   ├── category-a/*.pdf       # 该类论文 PDF
-│   ├── category-b/OVERVIEW.md
-│   └── ...                    # 按研究主题分为 N 个分类
+├── INDEX.md                    # 总索引（按域分类的资源地图 + 密度标注）
+├── README.md                   # 快速导航
 │
-└── projects/                  # 外部项目
-    ├── INDEX.md               # 总索引（分类导航 + 数量统计）
-    ├── type-a/                # 按类型分类
-    │   ├── OVERVIEW.md        # 分类总览
-    │   ├── project-a.md       # 独立项目分析
-    │   └── project-b.md       # 同上
-    └── type-b/
-        ├── OVERVIEW.md
-        └── ...
+├── papers/                     # 学术论文
+│   ├── INDEX.md                # 论文总索引（域导航 + 跨域索引 + 统计）
+│   ├── deves-formalism/        # Runtime Kernel 理论基础（DEVS 形式化）
+│   │   ├── OVERVIEW.md         # 五维度分析
+│   │   └── *.pdf
+│   ├── planning/               # Planning 域
+│   ├── orchestration/          # Orchestration 域
+│   ├── knowledge-memory/       # Knowledge & Memory 域
+│   ├── skill-tool/             # Skill & Tool 域
+│   ├── inference/              # Inference Engine 域
+│   ├── governance/             # Governance 域
+│   ├── interop/                # Interop 域
+│   ├── observability/          # Observability 域
+│   └── cross-domain/           # 跨域架构设计（全域参考）
+│       ├── OVERVIEW.md
+│       └── *.pdf
+│
+└── projects/                   # 外部项目
+    ├── INDEX.md                # 项目总索引（域导航 + 接入决策树）
+    ├── orchestration/          # 完整 Agent 框架 → Orchestration 域接入
+    ├── interop/                # 通信协议 → Interop 域接入
+    ├── governance/             # 安全/成本工具 → Governance 域接入
+    ├── knowledge-memory/       # 记忆系统 → Knowledge & Memory 域接入
+    ├── inference/              # LLM 网关 → Inference Engine 域接入
+    ├── observability/          # 追踪/评估 → Observability 域接入
+    └── cross-domain/           # 多用途基础设施
 ```
 
-## 2. 论文分类总览文档规范
+### 分类原则
 
-每个分类的 `OVERVIEW.md` 必须对每篇论文包含以下五个维度的详细分析：
+1. **按域分类**：论文和项目放入对它有**主要参考价值**的域目录下。
+2. **允许重叠**：一篇论文对多个域有价值时，放入主域并在次域的 OVERVIEW 中添加 `[see also]` 交叉引用，写清楚具体哪个部分（如"§3.2 的工具安全模型 → skill-tool/ 域"）。
+3. **跨域统一**：面向整体架构设计的论文和项目放入 `cross-domain/`。
+4. **理论基础**：DEVS 形式化论文留在 `deves-formalism/`（不视为域，而是方法论基础）。
+
+## 2. 论文分类与总览文档规范
+
+每个域目录的 `OVERVIEW.md` 必须对每篇论文包含以下五个维度的详细分析：
 
 | 维度 | 中文标识 | 内容要求 |
 |------|---------|---------|
@@ -71,10 +100,12 @@ resource/
 
 ## 4. 新增资源流程
 
-1. **发现新论文/项目** → 判断分类归属
-2. **论文**：
-   - 更新对应分类的 `OVERVIEW.md`，按五维度格式添加条目
-   - **下载 PDF**：论文 PDF 通常较小，应尝试从 arXiv 等开放平台下载（`https://arxiv.org/pdf/{ID}`），保存到对应分类子目录下。文件命名为 `{论文标题}_{Year}.pdf`（空格替换为连字符，如 `DEVS-Gen-Specification-Driven-Discrete-Event-World-Models_2026.pdf`），与总览文档中的论文标题一致
-3. **项目**：在对应分类下创建独立 `.md` 文件，按四维度格式编写
-4. **更新索引**：同步更新 `INDEX.md` 中的数量统计和导航
-5. **交叉引用**：如果新内容与已有分类相关，在相关 OVERVIEW 中添加 `[see also]` 引用
+1. **发现新论文/项目** → 判断对哪个项目域有主要参考价值，放入对应域目录
+2. **跨域判断**：资源对多个域有价值？
+   - 放入**主要参考价值**的域目录
+   - 在次要域的 OVERVIEW 中添加 `[see also: {域}/]` 交叉引用，注明具体关联内容
+3. **论文**：
+   - 更新对应域目录的 `OVERVIEW.md`，按五维度格式添加条目
+   - **下载 PDF**：从 arXiv 等开放平台下载（`https://arxiv.org/pdf/{ID}`），保存到对应域目录下。文件命名：`{论文标题}_{Year}.pdf`（空格→连字符）
+4. **项目**：在对应域目录下创建独立 `.md` 文件，按四维度格式编写
+5. **更新索引**：同步更新 `papers/INDEX.md` 或 `projects/INDEX.md` 中的数量统计和导航

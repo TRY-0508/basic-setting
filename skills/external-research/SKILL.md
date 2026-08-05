@@ -15,7 +15,7 @@ license: MIT
 加载本 skill 的场景：
 
 - 项目中已有或计划建立 `resource/` 目录结构
-- 调研资源数量大（30+），且跨越规划/编排/记忆/工具/推理等多个域
+- 调研资源数量大（30 篇以上），且跨越多个项目域
 - 需要对资源进行长期维护和跨模块交叉引用
 - 用户明确要求按"域"组织资源、或编写 INDEX.md / OVERVIEW.md
 
@@ -30,38 +30,29 @@ resource/
 │
 ├── papers/                     # 学术论文
 │   ├── INDEX.md                # 论文总索引（域导航 + 跨域索引 + 统计）
-│   ├── deves-formalism/        # Runtime Kernel 理论基础（DEVS 形式化）
+│   ├── <域A>/                  # 每个项目域一个子目录
 │   │   ├── OVERVIEW.md         # 五维度分析
 │   │   └── *.pdf
-│   ├── planning/               # Planning 域
-│   ├── orchestration/          # Orchestration 域
-│   ├── knowledge-memory/       # Knowledge & Memory 域
-│   ├── skill-tool/             # Skill & Tool 域
-│   ├── inference/              # Inference Engine 域
-│   ├── governance/             # Governance 域
-│   ├── interop/                # Interop 域
-│   ├── observability/          # Observability 域
+│   ├── <域B>/
 │   └── cross-domain/           # 跨域架构设计（全域参考）
 │       ├── OVERVIEW.md
 │       └── *.pdf
 │
 └── projects/                   # 外部项目
     ├── INDEX.md                # 项目总索引（域导航 + 接入决策树）
-    ├── orchestration/          # 完整 Agent 框架 → Orchestration 域接入
-    ├── interop/                # 通信协议 → Interop 域接入
-    ├── governance/             # 安全/成本工具 → Governance 域接入
-    ├── knowledge-memory/       # 记忆系统 → Knowledge & Memory 域接入
-    ├── inference/              # LLM 网关 → Inference Engine 域接入
-    ├── observability/          # 追踪/评估 → Observability 域接入
+    ├── <域A>/                  # 按项目域组织
+    ├── <域B>/
     └── cross-domain/           # 多用途基础设施
 ```
+
+**域清单由项目自身的架构划分决定，本规范不预设固定清单。**
 
 ### 分类原则
 
 1. **按域分类**：论文和项目放入对它有**主要参考价值**的域目录下。
-2. **允许重叠**：一篇论文对多个域有价值时，放入主域并在次域的 OVERVIEW 中添加 `[see also]` 交叉引用，写清楚具体哪个部分（如"§3.2 的工具安全模型 → skill-tool/ 域"）。
+2. **允许重叠**：一篇论文对多个域有价值时，放入主域，并在次域的 OVERVIEW 中添加 `[see also]` 交叉引用，注明具体哪个章节对次域有价值。
 3. **跨域统一**：面向整体架构设计的论文和项目放入 `cross-domain/`。
-4. **理论基础**：DEVS 形式化论文留在 `deves-formalism/`（不视为域，而是方法论基础）。
+4. **理论基础**：方法论基础类资源（如形式化方法、通用架构框架）放入独立的基础目录，不视为域。
 
 ## 2. 论文分类与总览文档规范
 

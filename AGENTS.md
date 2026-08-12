@@ -144,7 +144,8 @@ basic-setting/
 $src = "$env:USERPROFILE\.config\opencode"
 $repo = "<local-repo-path>"  # 本地 clone 路径
 Copy-Item "$src\AGENTS.md" "$repo\AGENTS.md"
-Copy-Item -Recurse -Force "$src\skills" "$repo\skills"
+New-Item -ItemType Directory -Force -Path "$repo\skills" | Out-Null
+Copy-Item -Recurse -Force "$src\skills\*" "$repo\skills\"
 cd $repo; git add -A; git commit -m "sync: update config"; git push
 ```
 
@@ -155,7 +156,8 @@ cd $repo; git add -A; git commit -m "sync: update config"; git push
 git clone https://github.com/TRY-0508/basic-setting.git "<temp-path>"
 $dst = "$env:USERPROFILE\.config\opencode"
 Copy-Item "<temp-path>\AGENTS.md" "$dst\AGENTS.md"
-Copy-Item -Recurse -Force "<temp-path>\skills" "$dst\skills"
+New-Item -ItemType Directory -Force -Path "$dst\skills" | Out-Null
+Copy-Item -Recurse -Force "<temp-path>\skills\*" "$dst\skills\"
 ```
 
 ### 注意事项
